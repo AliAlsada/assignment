@@ -1,0 +1,9 @@
+---
+- name: Baseline - Configure IP forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "{{ '1' if baseline_ip_forward_enabled | bool else '0' }}"
+    sysctl_file: /etc/sysctl.d/99-baseline.conf
+    sysctl_set: true
+    state: present
+  tags: baseline

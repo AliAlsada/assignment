@@ -1,0 +1,21 @@
+---
+# Firewall
+baseline_firewall_allowed_ports:
+  - { src: "{{ router_db_ip }}", port: "22" } # ssh
+
+# Containers
+baseline_firewall_forwarded_ports:
+  - { src: "{{ app_ip }}", dest: "any", port: "5432" } # postgres
+
+# Postgres
+postgres_publish_addresses:
+  - "127.0.0.1"
+  - "{{ db_ip }}"
+postgres_databases:
+  - name: "{{ db_name }}"
+    owner: "{{ db_user }}"
+postgres_users:
+  - name: "{{ db_user }}"
+    password: "{{ postgres_app_password }}"
+postgres_hba_entries:
+  - { type: "host", database: "{{ db_name }}", user: "{{ db_user }}", address: "{{ app_ip }}/32", method: "scram-sha-256" }

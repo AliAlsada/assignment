@@ -1,0 +1,15 @@
+---
+- name: Docker - Install packages
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: present
+  tags: docker
+
+- name: Docker - Enable service
+  ansible.builtin.service:
+    name: "{{ docker_service_name }}"
+    state: started
+    enabled: true
+  notify:
+    - Docker - Restart docker
+  tags: docker

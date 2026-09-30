@@ -1,0 +1,23 @@
+---
+# Connection
+# The first run connects as the default user of the image: -e ansible_user=ubuntu
+ansible_user: "devops"
+
+# Users
+baseline_admin_users:
+  - name: "devops"
+    pubkeys:
+      - "{{ lookup('ansible.builtin.file', '~/.ssh/id_ed25519.pub') }}"
+
+# Servers
+lb_ip: "10.10.1.2"
+app_ip: "10.10.2.2"
+db_ip: "10.10.3.2"
+
+# Router
+router_app_ip: "10.10.2.254"
+router_db_ip: "10.10.3.254"
+
+# Database
+db_name: "app"
+db_user: "app"

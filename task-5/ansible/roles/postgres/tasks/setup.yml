@@ -1,0 +1,36 @@
+---
+- name: Postgres - Install packages
+  ansible.builtin.apt:
+    name: python3-psycopg2
+    state: present
+  tags: postgres
+
+- name: Postgres - Create group
+  ansible.builtin.group:
+    name: "{{ postgres_group }}"
+    gid: "{{ postgres_gid }}"
+    system: true
+  tags: postgres
+
+- name: Postgres - Create user
+  ansible.builtin.user:
+    name: "{{ postgres_user }}"
+    uid: "{{ postgres_uid }}"
+    group: "{{ postgres_group }}"
+    home: "{{ postgres_home_path }}"
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+  tags: postgres
+
+- name: Postgres - Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: "0700"
+  loop:
+    - "{{ postgres_home_path }}"
+    - "{{ postgres_data_volume }}"
+  tags: postgres

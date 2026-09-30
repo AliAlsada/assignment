@@ -1,0 +1,12 @@
+---
+# Network
+baseline_ip_forward_enabled: true
+
+# Firewall
+baseline_firewall_allowed_ports:
+  - { src: "10.10.1.0/24", port: "22" } # ssh
+
+# The router drops the traffic between the tiers, except for these
+baseline_firewall_forwarded_ports:
+  - { src: "{{ lb_ip }}", dest: "{{ app_ip }}", port: "8000" } # lb to app
+  - { src: "{{ app_ip }}", dest: "{{ db_ip }}", port: "5432" } # app to postgres

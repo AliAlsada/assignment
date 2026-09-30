@@ -1,0 +1,7 @@
+---
+# Network
+# Docker needs the forwarding to reach its containers
+baseline_ip_forward_enabled: true
+
+# Firewall
+baseline_firewall_docker_enabled: true

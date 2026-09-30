@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+
+listen_addresses = '*'
+port = {{ postgres_port }}
+max_connections = {{ postgres_max_connections }}
+password_encryption = scram-sha-256

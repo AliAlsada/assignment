@@ -1,0 +1,10 @@
+# Docker sends the traffic of the published ports to the DOCKER-USER chain first.
+# It is dropped here, except for the ports allowed with "ufw route allow".
+*filter
+:ufw-user-forward - [0:0]
+:DOCKER-USER - [0:0]
+-A DOCKER-USER -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
+-A DOCKER-USER -i {{ baseline_firewall_docker_interface }} -j RETURN
+-A DOCKER-USER -j ufw-user-forward
+-A DOCKER-USER -j DROP
+COMMIT

@@ -1,0 +1,23 @@
+---
+- name: App - Copy build files
+  ansible.builtin.copy:
+    src: "{{ app_source_path }}/{{ item }}"
+    dest: "{{ app_home_path }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - Dockerfile
+    - app.py
+  register: app_build_files
+  tags: app
+
+- name: App - Build image
+  community.docker.docker_image:
+    name: "{{ app_docker_image_name }}"
+    tag: "{{ app_docker_image_tag }}"
+    source: build
+    force_source: "{{ app_build_files.changed }}"
+    build:
+      path: "{{ app_home_path }}"
+  tags: app

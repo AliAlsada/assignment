@@ -1,0 +1,7 @@
+---
+- name: Postgres - Restart postgres
+  community.docker.docker_container:
+    name: "{{ postgres_container_name }}"
+    state: started
+    restart: true
+  tags: postgres

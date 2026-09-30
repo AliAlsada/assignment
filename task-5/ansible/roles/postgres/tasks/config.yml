@@ -1,0 +1,14 @@
+---
+- name: Postgres - Copy configuration files
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ postgres_home_path }}/{{ item }}"
+    owner: "{{ postgres_user }}"
+    group: "{{ postgres_group }}"
+    mode: "0600"
+  loop:
+    - postgresql.conf
+    - pg_hba.conf
+  notify:
+    - Postgres - Restart postgres
+  tags: postgres

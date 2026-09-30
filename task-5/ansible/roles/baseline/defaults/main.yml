@@ -1,0 +1,35 @@
+---
+# Packages
+baseline_packages:
+  - curl
+  - ufw
+
+# Users
+baseline_admin_group: "sudonopass"
+# baseline_admin_users:
+#   - name: "devops"
+#     pubkeys:
+#       - "ssh-ed25519 AAAA..."
+baseline_admin_users: []
+
+# SSH
+baseline_ssh_service_name: "ssh"
+baseline_ssh_permit_root_login: "no"
+baseline_ssh_password_authentication: "no"
+
+# Network
+baseline_ip_forward_enabled: false
+
+# Firewall
+baseline_firewall_enabled: true
+# baseline_firewall_allowed_ports:
+#   - { src: "10.0.0.0/8", port: "8000" }
+#   - { src: "any", port: "80", proto: "tcp" }
+baseline_firewall_allowed_ports: []
+# baseline_firewall_forwarded_ports:
+#   - { src: "10.0.1.2", dest: "10.0.2.2", port: "8000" }
+#   - { src: "any", dest: "any", port: "80" }
+baseline_firewall_forwarded_ports: []
+# The traffic to the docker containers is filtered by the forwarded ports
+baseline_firewall_docker_enabled: false
+baseline_firewall_docker_interface: "docker0"

@@ -1,0 +1,29 @@
+---
+# Traefik
+traefik_container_name: "traefik"
+
+# Docker Image
+traefik_docker_image_name: "traefik"
+traefik_docker_image_tag: "v3.7"
+
+# Paths
+traefik_config_path: "/srv/traefik"
+traefik_apps_path: "/srv/traefik/apps"
+
+# Entrypoints
+traefik_http_port: "80"
+traefik_https_port: "443"
+
+# Logs
+traefik_log_level: "INFO"
+traefik_access_log_enabled: true
+
+# Apps
+# traefik_apps:
+#   - name: "app"
+#     routes:
+#       - rule: "Host(`app.example.com`)"
+#     healthcheck_path: "/health"
+#     backends:
+#       - url: "http://10.0.0.2:8000"
+traefik_apps: []

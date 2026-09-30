@@ -1,0 +1,6 @@
+name: thmanyah
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: thmanyah Infrastructure

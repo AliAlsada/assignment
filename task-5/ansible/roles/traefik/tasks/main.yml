@@ -1,0 +1,8 @@
+---
+- name: Traefik - Include setup tasks
+  ansible.builtin.include_tasks: "setup.yml"
+  tags: traefik
+
+- name: Traefik - Include run tasks
+  ansible.builtin.include_tasks: "run.yml"
+  tags: traefik

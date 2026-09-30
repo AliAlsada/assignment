@@ -1,0 +1,27 @@
+---
+- name: Baseline - Include setup tasks
+  ansible.builtin.include_tasks: "setup.yml"
+  tags: baseline
+
+- name: Baseline - Include users tasks
+  ansible.builtin.include_tasks: "users.yml"
+  tags:
+    - baseline
+    - users
+
+- name: Baseline - Include ssh tasks
+  ansible.builtin.include_tasks: "ssh.yml"
+  tags:
+    - baseline
+    - ssh
+
+- name: Baseline - Include network tasks
+  ansible.builtin.include_tasks: "network.yml"
+  tags: baseline
+
+- name: Baseline - Include firewall tasks
+  ansible.builtin.include_tasks: "firewall.yml"
+  when: baseline_firewall_enabled | bool
+  tags:
+    - baseline
+    - firewall

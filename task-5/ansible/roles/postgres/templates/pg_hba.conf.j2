@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+local   all             all                                     scram-sha-256
+host    all             {{ postgres_admin_user }}    {{ postgres_admin_address }}    scram-sha-256
+{% for entry in postgres_hba_entries %}
+{{ entry.type }}    {{ entry.database }}    {{ entry.user }}    {{ entry.address }}    {{ entry.method }}
+{% endfor %}

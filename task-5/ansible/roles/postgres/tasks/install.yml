@@ -1,0 +1,70 @@
+---
+- name: Postgres - Run container
+  community.docker.docker_container:
+    name: "{{ postgres_container_name }}"
+    image: "{{ postgres_docker_image_name }}:{{ postgres_docker_image_tag }}"
+    state: started
+    restart_policy: always
+    ports: "{{ postgres_publish_addresses | map('regex_replace', '$', ':' ~ postgres_port ~ ':' ~ postgres_port) | list }}"
+    user: "{{ postgres_uid }}:{{ postgres_gid }}"
+    command: >-
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c hba_file=/etc/postgresql/pg_hba.conf
+    env:
+      POSTGRES_USER: "{{ postgres_admin_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_admin_password }}"
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - "{{ postgres_data_volume }}:/var/lib/postgresql/data"
+      - "{{ postgres_home_path }}:/etc/postgresql:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p {{ postgres_port }} -U {{ postgres_admin_user }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  no_log: true
+  tags: postgres
+
+- name: Postgres - Apply configuration
+  ansible.builtin.meta: flush_handlers
+  tags: postgres
+
+- name: Postgres - Wait for the server
+  community.postgresql.postgresql_ping:
+    login_host: "{{ postgres_admin_host }}"
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_admin_user }}"
+    login_password: "{{ postgres_admin_password }}"
+  register: postgres_ping
+  until: postgres_ping.is_available
+  retries: 30
+  delay: 2
+  tags: postgres
+
+- name: Postgres - Create users
+  community.postgresql.postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    login_host: "{{ postgres_admin_host }}"
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_admin_user }}"
+    login_password: "{{ postgres_admin_password }}"
+  loop: "{{ postgres_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  no_log: true
+  tags: postgres
+
+- name: Postgres - Create databases
+  community.postgresql.postgresql_db:
+    name: "{{ item.name }}"
+    owner: "{{ item.owner }}"
+    login_host: "{{ postgres_admin_host }}"
+    port: "{{ postgres_port }}"
+    login_user: "{{ postgres_admin_user }}"
+    login_password: "{{ postgres_admin_password }}"
+  loop: "{{ postgres_databases }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: postgres

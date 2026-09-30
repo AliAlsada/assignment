@@ -1,0 +1,9 @@
+---
+- name: App - Create directory
+  ansible.builtin.file:
+    path: "{{ app_home_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  tags: app

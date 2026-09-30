@@ -1,0 +1,14 @@
+---
+- name: Traefik - Run container
+  community.docker.docker_container:
+    name: "{{ traefik_container_name }}"
+    image: "{{ traefik_docker_image_name }}:{{ traefik_docker_image_tag }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "{{ traefik_http_port }}:{{ traefik_http_port }}"
+      - "{{ traefik_https_port }}:{{ traefik_https_port }}"
+    read_only: true
+    volumes:
+      - "{{ traefik_config_path }}:/etc/traefik:ro"
+  tags: traefik

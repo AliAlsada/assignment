@@ -1,0 +1,72 @@
+config:
+  global:env: "dev"
+  global:domain: ".thmanyah.local"
+  global:admin_users:
+    - email: "admin@thmanyah.local"
+      pubkey_file: "~/.ssh/id_ed25519.pub"
+  libvirt:uri: "qemu:///system"
+  image:pool: "default"
+  image:source: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+  
+  networks:tiers:
+    - name: "public"
+      cidr: "10.10.1.0/24"
+    - name: "app"
+      cidr: "10.10.2.0/24"
+    - name: "db"
+      cidr: "10.10.3.0/24"
+
+  # The router is the only server with an interface in every network
+  servers:router_servers:
+    - name: "router-1"
+      cpu: 1
+      memory: 512
+      disk: 10
+      networks:
+        - tier: "public"
+          ip: "10.10.1.254"
+        - tier: "app"
+          ip: "10.10.2.254"
+        - tier: "db"
+          ip: "10.10.3.254"
+
+  # The routes send the traffic for the other tiers to the router
+  servers:lb_servers:
+    - name: "lb-1"
+      cpu: 1
+      memory: 1024
+      disk: 10
+      networks:
+        - tier: "public"
+          ip: "10.10.1.2"
+          routes:
+            - to: "10.10.2.0/24"
+              via: "10.10.1.254"
+
+  servers:app_servers:
+    - name: "app-1"
+      cpu: 1
+      memory: 1024
+      disk: 10
+      networks:
+        - tier: "app"
+          ip: "10.10.2.2"
+          routes:
+            - to: "10.10.1.0/24"
+              via: "10.10.2.254"
+            - to: "10.10.3.0/24"
+              via: "10.10.2.254"
+
+  servers:postgres_servers:
+    - name: "db-1"
+      cpu: 1
+      memory: 1024
+      disk: 10
+      networks:
+        - tier: "db"
+          ip: "10.10.3.2"
+          routes:
+            - to: "10.10.2.0/24"
+              via: "10.10.3.254"
+
+encryptionsalt: v1:Wgi5BTZa1Q4=:v1:k+5mI+Xyqs3AftBQ:HEbOkJqrXRiwPU77MEuvLtH3ETreKw==

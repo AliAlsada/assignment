@@ -1,0 +1,32 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+http:
+  routers:
+  {% for route in item.routes %}
+    {{ item.name }}-{{ loop.index }}:
+      rule: "{{ route.rule }}"
+      entryPoints:
+        - web
+      service: "{{ item.name }}"
+    {{ item.name }}-{{ loop.index }}-secure:
+      rule: "{{ route.rule }}"
+      entryPoints:
+        - websecure
+      tls: {}
+      service: "{{ item.name }}"
+  {% endfor %}
+
+  services:
+    {{ item.name }}:
+      loadBalancer:
+        {% if item.healthcheck_path is defined %}
+        healthCheck:
+          path: "{{ item.healthcheck_path }}"
+          interval: "10s"
+          timeout: "3s"
+        {% endif %}
+        servers:
+        {% for backend in item.backends %}
+          - url: "{{ backend.url }}"
+        {% endfor %}

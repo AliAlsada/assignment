@@ -1,0 +1,47 @@
+---
+- name: Baseline - Create admin group
+  ansible.builtin.group:
+    name: "{{ baseline_admin_group }}"
+    system: true
+  tags:
+    - baseline
+    - users
+
+- name: Baseline - Copy sudoers file
+  ansible.builtin.template:
+    src: "sudoers.j2"
+    dest: "/etc/sudoers.d/{{ baseline_admin_group }}"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+  tags:
+    - baseline
+    - users
+
+- name: Baseline - Create admin users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups:
+      - "{{ baseline_admin_group }}"
+    append: true
+    shell: /bin/bash
+    password_lock: true
+  loop: "{{ baseline_admin_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - baseline
+    - users
+
+- name: Baseline - Add SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.pubkeys | join('\n') }}"
+    exclusive: true
+  loop: "{{ baseline_admin_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - baseline
+    - users

@@ -1,0 +1,45 @@
+---
+# Postgres
+postgres_container_name: "postgres"
+postgres_home_path: "/opt/postgres/17"
+postgres_data_volume: "/srv/postgres/17"
+
+# Docker Image
+postgres_docker_image_name: "postgres"
+postgres_docker_image_tag: "17"
+
+# User
+postgres_user: "postgres"
+postgres_group: "postgres"
+postgres_uid: "2001"
+postgres_gid: "2001"
+
+# Admin
+postgres_admin_user: "postgres"
+postgres_admin_password: "change-me"
+# The admin connects from the server, through the docker network
+postgres_admin_host: "127.0.0.1"
+postgres_admin_address: "172.17.0.1/32"
+
+# Network
+postgres_publish_addresses:
+  - "127.0.0.1"
+postgres_port: "5432"
+postgres_max_connections: "100"
+
+# Databases
+# postgres_databases:
+#   - name: "app"
+#     owner: "app"
+postgres_databases: []
+
+# Users
+# postgres_users:
+#   - name: "app"
+#     password: "change-me"
+postgres_users: []
+
+# Client Authentication
+# postgres_hba_entries:
+#   - { type: "host", database: "app", user: "app", address: "10.0.0.2/32", method: "scram-sha-256" }
+postgres_hba_entries: []

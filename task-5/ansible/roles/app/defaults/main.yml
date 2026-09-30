@@ -1,0 +1,24 @@
+---
+# App
+app_container_name: "app"
+app_home_path: "/opt/app"
+
+# Source
+app_source_path: "{{ playbook_dir }}/../../app"
+
+# Docker Image
+app_docker_image_name: "app"
+app_docker_image_tag: "1.0.0"
+
+# User
+app_uid: "2002"
+app_gid: "2002"
+
+# Network
+app_listen_address: "127.0.0.1"
+app_listen_port: "8000"
+
+# Environment
+# app_vars:
+#   DB_HOST: "10.0.0.2"
+app_vars: {}

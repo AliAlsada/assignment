@@ -1,0 +1,114 @@
+---
+- name: Baseline - Allow firewall ports
+  community.general.ufw:
+    rule: allow
+    direction: in
+    src: "{{ item.src }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto | default('tcp') }}"
+  loop: "{{ baseline_firewall_allowed_ports }}"
+  loop_control:
+    label: "{{ item.src }} -> {{ item.port }}"
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Allow forwarded ports
+  community.general.ufw:
+    rule: allow
+    route: true
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto | default('tcp') }}"
+  loop: "{{ baseline_firewall_forwarded_ports }}"
+  loop_control:
+    label: "{{ item.src }} -> {{ item.dest }}:{{ item.port }}"
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Copy docker firewall rules
+  ansible.builtin.blockinfile:
+    path: /etc/ufw/after.rules
+    marker: "# {mark} BASELINE DOCKER"
+    block: "{{ lookup('ansible.builtin.template', 'ufw_docker.rules.j2') }}"
+  when: baseline_firewall_docker_enabled | bool
+  notify:
+    - Reload ufw
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Remove docker firewall rules
+  ansible.builtin.blockinfile:
+    path: /etc/ufw/after.rules
+    marker: "# {mark} BASELINE DOCKER"
+    state: absent
+  when: not (baseline_firewall_docker_enabled | bool)
+  notify:
+    - Reload ufw
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Deny forwarded traffic
+  community.general.ufw:
+    direction: routed
+    default: deny
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Deny incoming traffic
+  community.general.ufw:
+    direction: incoming
+    default: deny
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Allow outgoing traffic
+  community.general.ufw:
+    direction: outgoing
+    default: allow
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Check firewall status
+  ansible.builtin.command: ufw status
+  register: baseline_firewall_status
+  changed_when: false
+  tags:
+    - baseline
+    - firewall
+
+# Enabling the firewall stalls the open SSH connections, so it runs in the
+# background after the task returns and the connection is opened again
+- name: Baseline - Enable firewall
+  ansible.builtin.shell: sleep 3 && ufw --force enable
+  async: 60
+  poll: 0
+  changed_when: true
+  when:
+    - "'Status: active' not in baseline_firewall_status.stdout"
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Reset connection
+  ansible.builtin.meta: reset_connection
+  tags:
+    - baseline
+    - firewall
+
+- name: Baseline - Wait for connection
+  ansible.builtin.wait_for_connection:
+    delay: 10
+    timeout: 120
+  when:
+    - "'Status: active' not in baseline_firewall_status.stdout"
+  tags:
+    - baseline
+    - firewall

@@ -1,0 +1,55 @@
+---
+- name: Traefik - Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  loop:
+    - "{{ traefik_config_path }}"
+    - "{{ traefik_apps_path }}"
+  tags: traefik
+
+- name: Traefik - Copy configuration files
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ traefik_config_path }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0640"
+  loop:
+    - traefik.yml
+  notify:
+    - Restart traefik
+  tags: traefik
+
+- name: Traefik - Copy app files
+  ansible.builtin.template:
+    src: "traefik_app.yml.j2"
+    dest: "{{ traefik_apps_path }}/{{ item.name }}.yml"
+    owner: root
+    group: root
+    mode: "0640"
+  loop: "{{ traefik_apps }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: traefik
+
+- name: Traefik - Find app files
+  ansible.builtin.find:
+    paths: "{{ traefik_apps_path }}"
+    patterns: "*.yml"
+  register: traefik_app_files
+  tags: traefik
+
+- name: Traefik - Remove stale app files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ traefik_app_files.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - (item.path | basename | splitext | first) not in (traefik_apps | map(attribute='name') | list)
+  tags: traefik

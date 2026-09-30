@@ -1,0 +1,27 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+entryPoints:
+  web:
+    address: ":{{ traefik_http_port }}"
+  websecure:
+    address: ":{{ traefik_https_port }}"
+
+providers:
+  file:
+    directory: "/etc/traefik/apps"
+    watch: true
+
+log:
+  level: "{{ traefik_log_level }}"
+
+{% if traefik_access_log_enabled | bool %}
+accessLog: {}
+
+{% endif %}
+api:
+  dashboard: false
+
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false

@@ -1,0 +1,18 @@
+---
+# Firewall
+baseline_firewall_allowed_ports:
+  - { src: "10.10.1.0/24", port: "22" } # ssh
+
+# Containers
+baseline_firewall_forwarded_ports:
+  - { src: "any", dest: "any", port: "80" } # http
+  - { src: "any", dest: "any", port: "443" } # https
+
+# Traefik
+traefik_apps:
+  - name: "app"
+    routes:
+      - rule: "PathPrefix(`/`)"
+    healthcheck_path: "/health"
+    backends:
+      - url: "http://{{ app_ip }}:8000"

@@ -1,0 +1,45 @@
+---
+- name: Baseline configuration
+  hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - baseline
+  tags:
+    - baseline
+
+- name: Docker Servers
+  hosts: docker_servers
+  become: true
+  gather_facts: true
+  roles:
+    - docker
+  tags:
+    - docker
+
+- name: Postgres Servers
+  hosts: postgres_servers
+  become: true
+  gather_facts: true
+  roles:
+    - postgres
+  tags:
+    - postgres
+
+- name: Application Servers
+  hosts: app_servers
+  become: true
+  gather_facts: true
+  roles:
+    - app
+  tags:
+    - app
+
+- name: Load Balancer Servers
+  hosts: lb_servers
+  become: true
+  gather_facts: true
+  roles:
+    - traefik
+  tags:
+    - traefik

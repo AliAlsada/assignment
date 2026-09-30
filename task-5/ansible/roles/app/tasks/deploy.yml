@@ -1,0 +1,40 @@
+---
+- name: App - Copy environment file
+  ansible.builtin.template:
+    src: "app.env.j2"
+    dest: "{{ app_home_path }}/app.env"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  register: app_env_file
+  tags: app
+
+- name: App - Run container
+  community.docker.docker_container:
+    name: "{{ app_container_name }}"
+    image: "{{ app_docker_image_name }}:{{ app_docker_image_tag }}"
+    state: started
+    restart_policy: always
+    hostname: "{{ inventory_hostname }}"
+    recreate: "{{ app_build_files.changed or app_env_file.changed }}"
+    ports:
+      - "{{ app_listen_address }}:{{ app_listen_port }}:{{ app_listen_port }}"
+    user: "{{ app_uid }}:{{ app_gid }}"
+    read_only: true
+    cap_drop:
+      - ALL
+    env_file: "{{ app_home_path }}/app.env"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ app_listen_port }}/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+  tags: app
+
+- name: App - Wait for the service
+  ansible.builtin.wait_for:
+    host: "{{ app_listen_address }}"
+    port: "{{ app_listen_port }}"
+    timeout: 60
+  tags: app

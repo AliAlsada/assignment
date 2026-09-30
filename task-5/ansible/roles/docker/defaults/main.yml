@@ -1,0 +1,11 @@
+---
+# Packages
+docker_packages:
+  - docker.io
+  - python3-docker
+docker_service_name: "docker"
+
+# Logs
+docker_log_driver: "json-file"
+docker_log_max_size: "10m"
+docker_log_max_file: "3"
