@@ -1,0 +1,23 @@
+---
+config:
+  aws:region: "eu-central-1"
+  global:env: "dev"
+
+  # Only this address may send the stream to the input
+  stream:source_cidr: "51.235.162.139/32"
+
+  # The recordings are written as MPEG-TS files under this prefix
+  stream:bucket_prefix: "thmanyah-recordings-"
+  stream:recording_path: "recordings/stream"
+
+  # A new file is started every rollover_interval seconds
+  stream:rollover_interval: "300"
+
+  # Output encoding
+  stream:video_width: "1920"
+  stream:video_height: "1080"
+  stream:video_bitrate: "12000000"
+  stream:video_framerate: "30"
+  stream:audio_bitrate: "192000"
+  
+encryptionsalt: v1:Eg65x/YFOQY=:v1:2U2RQnOZq5Qmx6iM:eQqJv9x2pksr+frqw9GF8qZt+M+zlA==

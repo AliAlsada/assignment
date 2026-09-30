@@ -1,0 +1,6 @@
+name: thmanyah-medialive
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: thmanyah MediaLive Infrastructure
