@@ -1,0 +1,68 @@
+x-rustfs: &rustfs
+  image: rustfs/rustfs:latest
+  environment:
+    RUSTFS_ACCESS_KEY: ${ACCESS_KEY}
+    RUSTFS_SECRET_KEY: ${SECRET_KEY}
+  healthcheck:
+    test: ["CMD-SHELL", "curl -sf http://localhost:9000/health || wget -qO- http://localhost:9000/health"]
+    interval: 5s
+    timeout: 3s
+    retries: 10
+
+services:
+  src:
+    <<: *rustfs
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - src-data:/data
+
+  dst:
+    <<: *rustfs
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    volumes:
+      - dst-data:/data
+
+  # creates the buckets and drops a sample file in the source, then exits
+  setup:
+    image: amazon/aws-cli
+    depends_on:
+      src: { condition: service_healthy }
+      dst: { condition: service_healthy }
+    environment:
+      AWS_ACCESS_KEY_ID: ${ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${SECRET_KEY}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+    entrypoint: sh
+    command:
+      - -c
+      - |
+        aws --endpoint-url http://src:9000 s3 mb s3://${SRC_BUCKET} || true
+        aws --endpoint-url http://dst:9000 s3 mb s3://${DST_BUCKET} || true
+        head -c ${SAMPLE_MB}m /dev/urandom > /tmp/sample.bin
+        aws --endpoint-url http://src:9000 s3 cp --no-progress /tmp/sample.bin s3://${SRC_BUCKET}/sample.bin
+        aws --endpoint-url http://src:9000 s3 ls s3://${SRC_BUCKET}
+
+  nodered:
+    build:
+      context: .
+      dockerfile: nodered/Dockerfile
+    depends_on:
+      src: { condition: service_healthy }
+      dst: { condition: service_healthy }
+    ports:
+      - "1880:1880"
+    environment:
+      SRC_ENDPOINT: http://src:9000
+      DST_ENDPOINT: http://dst:9000
+      ACCESS_KEY: ${ACCESS_KEY}
+      SECRET_KEY: ${SECRET_KEY}
+      DST_BUCKET: ${DST_BUCKET}
+
+volumes:
+  src-data:
+  dst-data:

@@ -1,0 +1,14 @@
+[
+  { "id": "tab1", "type": "tab", "label": "s3 copy" },
+  {
+    "id": "inj1", "type": "inject", "z": "tab1", "name": "copy",
+    "payload": "{\"from\":\"src/sample.bin\",\"to\":\"dst/sample.bin\"}", "payloadType": "json",
+    "repeat": "", "once": false, "x": 150, "y": 100, "wires": [["fn1"]]
+  },
+  {
+    "id": "fn1", "type": "function", "z": "tab1", "name": "s3 copy",
+    "func": "const copy = global.get(\"s3copy\");\nconst { from, to } = msg.payload;\nconst log = { info: m => node.log(m), warn: m => node.warn(m), error: m => node.error(m) };\n\ncopy(from, to, { log })\n    .then(res => { msg.payload = res; node.send(msg); })\n    .catch(err => node.error(err.message, msg));\nreturn;",
+    "outputs": 1, "x": 360, "y": 100, "wires": [["dbg1"]]
+  },
+  { "id": "dbg1", "type": "debug", "z": "tab1", "name": "result", "active": true, "complete": "payload", "x": 550, "y": 100, "wires": [] }
+]
